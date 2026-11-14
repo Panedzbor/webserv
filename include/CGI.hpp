@@ -3,6 +3,7 @@
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
 #include "LocationConfig.hpp"
+#include <unistd.h>
 
 
 /* This class represents each isntance of a CGI script in http request */
@@ -12,8 +13,10 @@ class CGI {
         
         const std::string extension;
         const std::string interpreterPath; // e.g. /usr/bin/python3
+        int getFd() const;
+        int getPid() const;
         const std::string& getScriptPath() const;
-        const std::string& getArgv() const;
+        const std::vector<const char*>& getArgv() const;
         const std::vector<const char*>& getEnvp() const;
         const std::string& getBuffer() const;
         HttpResponse& response;
@@ -22,13 +25,16 @@ class CGI {
 
         void runScript();
         void processOutput();
+        void handleError();
         
 
     private:
-        int cgi_fd; // parent pipe reading end
+        int cgi_read_fd; // parent pipe reading end
+        int cgi_write_fd; // parent pipe writing end
+        int pid;
         std::string scriptPath; // e.g. www/scripts/script.py
-        std::string argv; // for execve()
-        std::vector<const char*> envp; // for execve()
+        std::vector<char*> argv; // for execve()
+        std::vector<char*> envp; // for execve()
         std::string cgiOutputBuffer; // collects partial CGI output
         bool responseReady; // indicates complete http response
             

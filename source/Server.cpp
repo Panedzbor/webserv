@@ -230,6 +230,7 @@ void Server::handleListenersEvents(Listener *listener, short revents)
 void Server::handleCGIevents(int cgi_fd, short revents, int client_fd)
 {
     /* Error handling */
+
     bool error = false;
     
     std::map<int, ClientConnection*>::iterator cc = clients.find(client_fd); // finds current client
@@ -260,7 +261,8 @@ void Server::handleCGIevents(int cgi_fd, short revents, int client_fd)
     }
     
     /* Valid event processing */
-    if (revents & (POLLIN | POLLHUP)) // if there is data to be read
+
+    else if (revents & (POLLIN | POLLHUP)) // if there is data to be read
         cgi->processOutput(); // reads until EOF then builds response and cleans up
 
     if (cgi->isResponseReady()) // if response is built, adds it to sendBuffer
